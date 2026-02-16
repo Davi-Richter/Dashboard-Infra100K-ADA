@@ -13,7 +13,7 @@ function buildUrl(sheetName: string): string {
 
 async function fetchCsv<T>(sheetName: string, header: boolean = true): Promise<T[] | string[][]> {
     const url = buildUrl(sheetName);
-    const response = await fetch(url, { next: { revalidate: 300 } });
+    const response = await fetch(url, { next: { revalidate: 60 } });
 
     if (!response.ok) {
         throw new Error(`Failed to fetch sheet "${sheetName}": ${response.status}`);

@@ -15,7 +15,7 @@ export function useDashboardData() {
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch("/api/sheets?tab=all");
+            const res = await fetch(`/api/sheets?tab=all&_t=${Date.now()}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const json = await res.json();
             setData({
