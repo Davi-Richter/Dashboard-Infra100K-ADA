@@ -14,109 +14,168 @@ export function GaugeChartGlass({
     max,
     reference = 3,
     suffix = "x",
-    title = "",
-    height = 280,
+    height = 300,
 }: GaugeChartGlassProps) {
-    const clampedValue = Math.min(Math.max(value, 0), max);
-    const angle = (clampedValue / max) * 180;
-    const refAngle = (reference / max) * 180;
+    const clamped = Math.min(Math.max(value, 0), max);
 
-    const r = 100;
-    const cx = 120;
-    const cy = 130;
+    // Geometry
+    const size = 300;
+    const cx = size / 2;
+    const cy = 160;
+    const radius = 110;
+    const strokeWidth = 22;
+    const valueStrokeWidth = 8;
 
-    const polarToCart = (angleDeg: number) => {
-        const rad = ((180 - angleDeg) * Math.PI) / 180;
-        return { x: cx + r * Math.cos(rad), y: cy - r * Math.sin(rad) };
-    };
+    // Semicircle = half circumference
+    const halfCircumference = Math.PI * radius;
 
-    // Zone arcs
-    const makeArc = (startAngle: number, endAngle: number) => {
-        const s = polarToCart(startAngle);
-        const e = polarToCart(endAngle);
-        const largeArc = endAngle - startAngle > 180 ? 1 : 0;
-        return `M ${s.x} ${s.y} A ${r} ${r} 0 ${largeArc} 0 ${e.x} ${e.y}`;
-    };
+    // Helper: convert a 0..max value to a dash length
+    const valueToDash = (v: number) => (v / max) * halfCircumference;
 
-    const zone1End = Math.min((reference * 0.5 / max) * 180, 180);
-    const zone2End = Math.min((reference / max) * 180, 180);
+    // Zone boundaries
+    const zone1Val = Math.min(reference * 0.5, max);
+    const zone2Val = Math.min(reference, max);
 
-    // Needle
-    const needleEnd = polarToCart(angle);
+    // Value indicator dot position
+    const valueAngle = Math.PI - (clamped / max) * Math.PI;
+    const dotX = cx + radius * Math.cos(valueAngle);
+    const dotY = cy - radius * Math.sin(valueAngle);
+
+    // Reference tick position
+    const refAngle = Math.PI - (reference / max) * Math.PI;
+    const tickLen = strokeWidth / 2 + 6;
+    const refTickX1 = cx + (radius - tickLen) * Math.cos(refAngle);
+    const refTickY1 = cy - (radius - tickLen) * Math.sin(refAngle);
+    const refTickX2 = cx + (radius + tickLen) * Math.cos(refAngle);
+    const refTickY2 = cy - (radius + tickLen) * Math.sin(refAngle);
 
     // Delta
     const delta = value - reference;
     const deltaStr = delta >= 0 ? `+${delta.toFixed(2)}` : delta.toFixed(2);
     const deltaColor = delta >= 0 ? "#22c55e" : "#ef4444";
 
+    // Semicircle path: starts at left, arcs over the top to the right
+    const arcD = `M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`;
+
     return (
-        <div className="flex flex-col items-center" style={{ height }}>
-            <svg viewBox="0 0 240 160" width="100%" style={{ maxWidth: 280 }}>
-                {/* Background arc */}
+        <div className="flex flex-col items-center justify-center" style={{ height }}>
+            <svg
+                viewBox={`0 0 ${size} 200`}
+                width="100%"
+                style={{ maxWidth: 340, overflow: "visible" }}
+            >
+                <defs>
+                    <filter id="gauge-dot-glow">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                {/* Background track */}
                 <path
-                    d={makeArc(0, 180)}
+                    d={arcD}
                     fill="none"
-                    stroke="rgba(255,255,255,0.05)"
-                    strokeWidth="18"
-                    strokeLinecap="round"
+                    stroke="rgba(255,255,255,0.04)"
+                    strokeWidth={strokeWidth}
                 />
-                {/* Red zone */}
+
+                {/* Green zone (full semicircle — bottom layer) */}
                 <path
-                    d={makeArc(0, zone1End)}
+                    d={arcD}
                     fill="none"
-                    stroke="rgba(239,68,68,0.2)"
-                    strokeWidth="18"
-                    strokeLinecap="round"
+                    stroke="rgba(34,197,94,0.20)"
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={halfCircumference}
+                    strokeDashoffset={0}
                 />
-                {/* Yellow zone */}
+
+                {/* Yellow zone: 0 → zone2 (middle layer, covers green) */}
                 <path
-                    d={makeArc(zone1End, zone2End)}
+                    d={arcD}
                     fill="none"
-                    stroke="rgba(245,158,11,0.2)"
-                    strokeWidth="18"
-                    strokeLinecap="round"
+                    stroke="rgba(245,158,11,0.20)"
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={`${valueToDash(zone2Val)} ${halfCircumference}`}
+                    strokeDashoffset={0}
                 />
-                {/* Green zone */}
+
+                {/* Red zone: 0 → zone1 (top layer, covers yellow) */}
                 <path
-                    d={makeArc(zone2End, 180)}
+                    d={arcD}
                     fill="none"
-                    stroke="rgba(34,197,94,0.2)"
-                    strokeWidth="18"
-                    strokeLinecap="round"
+                    stroke="rgba(239,68,68,0.20)"
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={`${valueToDash(zone1Val)} ${halfCircumference}`}
+                    strokeDashoffset={0}
                 />
-                {/* Value arc */}
-                <path
-                    d={makeArc(0, angle)}
-                    fill="none"
-                    stroke="rgba(255,255,255,0.8)"
-                    strokeWidth="6"
+
+                {/* Value arc (white, thinner) */}
+                {clamped > 0 && (
+                    <path
+                        d={arcD}
+                        fill="none"
+                        stroke="rgba(255,255,255,0.85)"
+                        strokeWidth={valueStrokeWidth}
+                        strokeLinecap="round"
+                        strokeDasharray={`${valueToDash(clamped)} ${halfCircumference}`}
+                        strokeDashoffset={0}
+                    />
+                )}
+
+                {/* Reference tick */}
+                <line
+                    x1={refTickX1}
+                    y1={refTickY1}
+                    x2={refTickX2}
+                    y2={refTickY2}
+                    stroke="#ef4444"
+                    strokeWidth={2.5}
                     strokeLinecap="round"
+                    opacity={0.8}
                 />
-                {/* Reference line */}
-                {(() => {
-                    const rp = polarToCart(refAngle);
-                    const rp2 = polarToCart(refAngle);
-                    const innerR = r - 14;
-                    const outerR = r + 14;
-                    const rad = ((180 - refAngle) * Math.PI) / 180;
-                    const x1 = cx + innerR * Math.cos(rad);
-                    const y1 = cy - innerR * Math.sin(rad);
-                    const x2 = cx + outerR * Math.cos(rad);
-                    const y2 = cy - outerR * Math.sin(rad);
-                    return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#ef4444" strokeWidth="2" />;
-                })()}
-                {/* Needle dot */}
-                <circle cx={needleEnd.x} cy={needleEnd.y} r="5" fill="white" />
-                {/* Center value */}
-                <text x={cx} y={cy - 5} textAnchor="middle" fill="white" fontSize="28" fontWeight="700" fontFamily="Inter">
+
+                {/* Value dot with glow */}
+                <circle
+                    cx={dotX}
+                    cy={dotY}
+                    r={6}
+                    fill="white"
+                    filter="url(#gauge-dot-glow)"
+                />
+
+                {/* Value text */}
+                <text
+                    x={cx}
+                    y={cy - 10}
+                    textAnchor="middle"
+                    fill="white"
+                    fontSize="38"
+                    fontWeight="700"
+                    fontFamily="Inter, system-ui, sans-serif"
+                >
                     {value.toFixed(2)}
                 </text>
-                <text x={cx} y={cy + 15} textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="12" fontFamily="Inter">
+                <text
+                    x={cx}
+                    y={cy + 14}
+                    textAnchor="middle"
+                    fill="rgba(255,255,255,0.30)"
+                    fontSize="14"
+                    fontFamily="Inter, system-ui, sans-serif"
+                    fontWeight="500"
+                >
                     {suffix}
                 </text>
             </svg>
-            {title && <p className="text-text-secondary text-sm mt-1">{title}</p>}
-            <p className="text-sm font-medium mt-1" style={{ color: deltaColor }}>
+
+            {/* Delta */}
+            <p
+                className="text-sm font-semibold -mt-1"
+                style={{ color: deltaColor }}
+            >
                 {deltaStr} vs meta ({reference}{suffix})
             </p>
         </div>
