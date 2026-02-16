@@ -12,7 +12,7 @@ export const SHEETS = {
 } as const;
 
 export const PLATFORM_FEE_RATE = 0.0707;
-export const DATA_START_DATE = "2025-01-27";
+export const DATA_START_DATE = "2026-01-27";
 export const CACHE_TTL = 300; // 5 min
 
 // ─── DDD → Estado ────────────────────────────────────────────────
