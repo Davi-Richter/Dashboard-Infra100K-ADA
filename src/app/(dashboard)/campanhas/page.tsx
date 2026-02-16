@@ -68,7 +68,23 @@ export default function CampanhasPage() {
         return campanhas
             .filter((c) => c.roas > 0)
             .slice(0, 15)
-            .map((c) => ({ campanha: c.campaignName, roas: parseFloat(c.roas.toFixed(2)) }));
+            .map((c) => {
+                // Clean up name: Remove "CAMPANHA X - " prefix and trim
+                let cleanName = c.campaignName
+                    .replace(/^CAMPANHA \d+ [-:|] /i, "") // Remove generic prefix
+                    .trim();
+
+                // Truncate if too long despite cleaning
+                if (cleanName.length > 25) {
+                    cleanName = cleanName.substring(0, 25) + "...";
+                }
+
+                return {
+                    campanha: cleanName,
+                    fullCampanha: c.campaignName, // Keep full name for tooltip if needed (not used by chart key but good to have)
+                    roas: parseFloat(c.roas.toFixed(2))
+                };
+            });
     }, [campanhas]);
 
     // Best ROAS campaign
@@ -133,6 +149,7 @@ export default function CampanhasPage() {
                         valueKey="roas"
                         color="#22c55e"
                         height={Math.max(roasData.length * 35, 200)}
+                        yAxisWidth={150}
                     />
                 </GlassCard>
 

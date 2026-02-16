@@ -17,6 +17,7 @@ interface HorizontalBarGlassProps {
     height?: number;
     color?: string;
     formatValue?: (v: number) => string;
+    yAxisWidth?: number;
 }
 
 export function HorizontalBarGlass({
@@ -26,10 +27,15 @@ export function HorizontalBarGlass({
     height = 350,
     color = "#22c55e",
     formatValue,
+    yAxisWidth = 80,
 }: HorizontalBarGlassProps) {
     return (
         <ResponsiveContainer width="100%" height={height}>
-            <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
+            <BarChart
+                data={data}
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+            >
                 <XAxis
                     type="number"
                     tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
@@ -43,9 +49,27 @@ export function HorizontalBarGlass({
                     tick={{ fill: "rgba(255,255,255,0.55)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
-                    width={80}
+                    width={yAxisWidth}
                 />
-                <Tooltip content={<GlassTooltip formatValue={formatValue} />} />
+                <Tooltip
+                    cursor={{ fill: "rgba(255,255,255,0.05)" }}
+                    content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                            return (
+                                <GlassTooltip
+                                    label={label}
+                                    payload={[{
+                                        name: "Valor",
+                                        value: payload[0].value as number,
+                                        color: payload[0].color
+                                    }]}
+                                    formatValue={formatValue}
+                                />
+                            );
+                        }
+                        return null;
+                    }}
+                />
                 <Bar dataKey={valueKey} radius={[0, 4, 4, 0]} fill={color} />
             </BarChart>
         </ResponsiveContainer>
