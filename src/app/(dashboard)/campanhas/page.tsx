@@ -70,9 +70,10 @@ export default function CampanhasPage() {
             .slice(0, 15)
             .map((c) => {
                 // Clean up name: Remove "CAMPANHA X - " prefix and trim
-                // Utilizando construtor RegExp para evitar erro de parser do Tailwind
-                // O padrão é /^CAMPANHA \d+ [-:|] /i
-                const prefixRegex = new RegExp("^CAMPANHA \\d+ [-:|] ", "i");
+                // Clean up name: Remove "CAMPANHA X - " prefix and trim
+                const separatorChars = "-:|";
+                const pattern = "^CAMPANHA \\d+ [" + separatorChars + "] ";
+                const prefixRegex = new RegExp(pattern, "i");
                 let cleanName = c.campaignName
                     .replace(prefixRegex, "") // Remove generic prefix
                     .trim();
