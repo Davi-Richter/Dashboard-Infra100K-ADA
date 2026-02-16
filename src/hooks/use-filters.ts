@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useMemo } from "react";
 import type { FilterState, Venda, FacebookRow, GeralRow } from "@/types/dashboard";
+import { format } from "date-fns";
+import { DATA_START_DATE } from "@/lib/constants";
 
 const DEFAULT_FILTERS: FilterState = {
     dateRange: { from: "", to: "" },
@@ -11,7 +13,13 @@ const DEFAULT_FILTERS: FilterState = {
 };
 
 export function useFilters() {
-    const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+    const [filters, setFilters] = useState<FilterState>(() => ({
+        ...DEFAULT_FILTERS,
+        dateRange: {
+            from: DATA_START_DATE,
+            to: format(new Date(), "yyyy-MM-dd"),
+        },
+    }));
 
     const setDateRange = useCallback((from: string, to: string) => {
         setFilters((prev) => ({ ...prev, dateRange: { from, to } }));
