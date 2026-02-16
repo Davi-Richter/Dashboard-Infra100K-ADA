@@ -46,7 +46,7 @@ export function Sidebar({ connected, lastUpdated, onRefresh, loading, children }
             </div>
 
             {/* Separator */}
-            <div className="mx-4 border-b border-white/[0.06]" />
+            <div className="mx-5 border-b border-white/[0.03]" />
 
             {/* Navigation */}
             <nav className="px-3 mt-4 space-y-1">

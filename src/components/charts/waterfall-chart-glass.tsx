@@ -16,26 +16,27 @@ interface WaterfallChartGlassProps {
 export function WaterfallChartGlass({ items, height = 350 }: WaterfallChartGlassProps) {
     if (items.length === 0) return null;
 
-    const maxAbs = Math.max(...items.map((i) => Math.abs(i.value)));
+    const maxAbs = Math.max(...items.map((i) => Math.abs(i.value || 0))) || 1;
 
     let cumulative = 0;
     const processed = items.map((item) => {
+        const val = isFinite(item.value) ? item.value : 0;
         if (item.type === "absolute") {
-            cumulative = item.value;
-            return { ...item, start: 0, barValue: item.value };
+            cumulative = val;
+            return { ...item, value: val, start: 0, barValue: val };
         } else if (item.type === "relative") {
             const start = cumulative;
-            cumulative += item.value;
-            return { ...item, start, barValue: item.value };
+            cumulative += val;
+            return { ...item, value: val, start, barValue: val };
         } else {
-            return { ...item, start: 0, barValue: item.value };
+            return { ...item, value: val, start: 0, barValue: val };
         }
     });
 
     return (
         <div className="flex items-end gap-3 justify-center" style={{ height }}>
             {processed.map((item, i) => {
-                const barHeight = Math.max((Math.abs(item.barValue) / maxAbs) * (height - 60), 20);
+                const barHeight = Math.max((Math.abs(item.barValue) / maxAbs) * (height - 60), 20) || 20;
                 const isNeg = item.value < 0;
                 const isTotal = item.type === "total";
 

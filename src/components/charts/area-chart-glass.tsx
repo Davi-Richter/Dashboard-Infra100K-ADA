@@ -35,26 +35,35 @@ export function AreaChartGlass({
         <ResponsiveContainer width="100%" height={height}>
             <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
+                    {/* SVG glow filter for active dots */}
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
                     {yKeys.map((key, i) => (
                         <linearGradient key={key} id={`grad-${key}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={CHART_COLORS[i % CHART_COLORS.length]} stopOpacity={0.3} />
+                            <stop offset="0%" stopColor={CHART_COLORS[i % CHART_COLORS.length]} stopOpacity={0.25} />
+                            <stop offset="50%" stopColor={CHART_COLORS[i % CHART_COLORS.length]} stopOpacity={0.08} />
                             <stop offset="100%" stopColor={CHART_COLORS[i % CHART_COLORS.length]} stopOpacity={0} />
                         </linearGradient>
                     ))}
                 </defs>
                 <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="rgba(255,255,255,0.04)"
+                    strokeDasharray="0"
+                    stroke="rgba(255,255,255,0.03)"
                     vertical={false}
                 />
                 <XAxis
                     dataKey={xKey}
-                    tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
+                    tick={{ fill: "rgba(255,255,255,0.28)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                 />
                 <YAxis
-                    tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
+                    tick={{ fill: "rgba(255,255,255,0.28)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={formatValue}
@@ -67,10 +76,17 @@ export function AreaChartGlass({
                         dataKey={key}
                         name={names[i]}
                         stroke={CHART_COLORS[i % CHART_COLORS.length]}
-                        strokeWidth={2.5}
+                        strokeWidth={2}
                         fill={`url(#grad-${key})`}
-                        dot={{ r: 3, fill: CHART_COLORS[i % CHART_COLORS.length], strokeWidth: 0 }}
-                        activeDot={{ r: 5, fill: CHART_COLORS[i % CHART_COLORS.length], stroke: "rgba(0,0,0,0.5)", strokeWidth: 2 }}
+                        dot={false}
+                        activeDot={{
+                            r: 5,
+                            fill: CHART_COLORS[i % CHART_COLORS.length],
+                            stroke: CHART_COLORS[i % CHART_COLORS.length],
+                            strokeWidth: 2,
+                            strokeOpacity: 0.3,
+                            filter: "url(#glow)",
+                        }}
                     />
                 ))}
             </AreaChart>

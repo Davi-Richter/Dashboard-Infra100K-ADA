@@ -10,18 +10,23 @@ interface KpiCardProps {
 
 export function KpiCard({ label, value, icon: Icon, delta, deltaType = "neutral" }: KpiCardProps) {
     return (
-        <div className="glass-card-sm">
-            <div className="flex items-center gap-2 mb-3">
-                <Icon size={16} className="text-text-tertiary" />
-                <span className="text-[0.75rem] text-text-tertiary uppercase tracking-wider font-medium">
+        <div className="glass-card-sm group">
+            <div className="flex items-center gap-3 mb-3">
+                {/* Ícone com fundo glass — estilo Quantix */}
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center
+                        bg-accent-muted border border-accent/10
+                        group-hover:bg-accent/15 transition-colors duration-300">
+                    <Icon size={15} className="text-accent" />
+                </div>
+                <span className="text-[0.7rem] text-text-tertiary uppercase tracking-[0.06em] font-semibold">
                     {label}
                 </span>
             </div>
-            <div className="text-[1.75rem] font-bold text-text-primary tracking-tight leading-tight">
+            <div className="text-[1.85rem] font-bold text-white tracking-tight leading-none">
                 {value}
             </div>
             {delta && (
-                <div className={`mt-2 badge-${deltaType}`}>
+                <div className={`mt-3 badge-${deltaType}`}>
                     {deltaType === "positive" && "↑ "}
                     {deltaType === "negative" && "↓ "}
                     {delta}

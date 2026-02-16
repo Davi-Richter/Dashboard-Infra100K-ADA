@@ -32,15 +32,15 @@ export function BarChartGlass({
     return (
         <ResponsiveContainer width="100%" height={height}>
             <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.03)" vertical={false} />
                 <XAxis
                     dataKey={xKey}
-                    tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
+                    tick={{ fill: "rgba(255,255,255,0.28)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                 />
                 <YAxis
-                    tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
+                    tick={{ fill: "rgba(255,255,255,0.28)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={formatValue}

@@ -70,10 +70,10 @@ export default function ClientesPage() {
 
     const recentClients = useMemo(() => {
         return [...vendas]
-            .sort((a, b) => b.dataCompra.getTime() - a.dataCompra.getTime())
+            .sort((a, b) => new Date(b.dataCompra).getTime() - new Date(a.dataCompra).getTime())
             .slice(0, 20)
             .map((v) => ({
-                data: format(v.dataCompra, "dd/MM/yyyy HH:mm"),
+                data: format(new Date(v.dataCompra), "dd/MM/yyyy HH:mm"),
                 nome: v.nome,
                 produto: v.produto,
                 valor: v.valor,

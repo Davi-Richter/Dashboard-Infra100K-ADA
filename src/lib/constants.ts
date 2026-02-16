@@ -43,8 +43,8 @@ export const DDD_ESTADO: Record<string, string> = {
 // ─── Chart colors ────────────────────────────────────────────────
 
 export const CHART_COLORS = [
-    "rgba(59, 130, 246, 0.8)",
-    "rgba(255, 255, 255, 0.7)",
+    "#ffffff",                        // branco puro (série principal)
+    "rgba(59, 130, 246, 0.9)",       // azul accent
     "rgba(255, 255, 255, 0.45)",
     "rgba(255, 255, 255, 0.25)",
     "rgba(255, 255, 255, 0.15)",
