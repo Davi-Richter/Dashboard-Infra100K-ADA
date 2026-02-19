@@ -87,7 +87,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 )}
 
                 {/* Desktop Sidebar Toggle */}
-                <div className="hidden md:flex fixed z-50 top-6 transition-all duration-300" style={{ left: isSidebarCollapsed ? '68px' : '248px' }}>
+                <div className="hidden md:flex fixed z-[60] top-6 transition-all duration-300" style={{ left: isSidebarCollapsed ? '68px' : '248px' }}>
                     <button
                         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                         className="bg-[#1e1e2d] border border-white/10 rounded-full p-1 hover:bg-[#2b2b3d] text-text-secondary transition-colors"
@@ -144,7 +144,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 </div>
 
                 <main className={`
-                    flex-1 p-4 md:p-8 min-h-screen pt-20 md:pt-8 transition-all duration-300 w-full overflow-x-hidden
+                    flex-1 min-w-0 p-4 md:p-8 min-h-screen pt-20 md:pt-8 transition-all duration-300 overflow-x-hidden
                     ${isSidebarCollapsed ? "md:ml-[80px]" : "md:ml-[260px]"}
                     ml-0
                 `}>
