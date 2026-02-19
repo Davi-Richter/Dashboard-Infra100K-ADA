@@ -22,7 +22,7 @@ export function KpiCard({ label, value, icon: Icon, delta, deltaType = "neutral"
                     {label}
                 </span>
             </div>
-            <div className="text-[1.85rem] font-bold text-white tracking-tight leading-none">
+            <div className="text-xl md:text-[1.85rem] font-bold text-white tracking-tight leading-none truncate" title={value}>
                 {value}
             </div>
             {delta && (

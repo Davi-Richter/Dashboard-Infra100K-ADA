@@ -7,7 +7,7 @@ import { useFilters, filterVendas, filterFacebook, filterGeral } from "@/hooks/u
 import { usePathname } from "next/navigation";
 import { DateRangePicker } from "@/components/filters/date-range-picker";
 import { MultiSelectFilter } from "@/components/filters/multi-select-filter";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
 import type { DashboardData } from "@/types/dashboard";
 
 interface DashboardContextValue {
@@ -86,6 +86,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                     />
                 )}
 
+                {/* Desktop Sidebar Toggle */}
+                <div className="hidden md:flex fixed z-50 top-6 transition-all duration-300" style={{ left: isSidebarCollapsed ? '68px' : '248px' }}>
+                    <button
+                        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                        className="bg-[#1e1e2d] border border-white/10 rounded-full p-1 hover:bg-[#2b2b3d] text-text-secondary transition-colors"
+                    >
+                        {isSidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                    </button>
+                </div>
+
                 <div className={`
                     fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out
                     ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
@@ -134,7 +144,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 </div>
 
                 <main className={`
-                    flex-1 p-4 md:p-8 min-h-screen pt-20 md:pt-8 transition-all duration-300
+                    flex-1 p-4 md:p-8 min-h-screen pt-20 md:pt-8 transition-all duration-300 w-full overflow-x-hidden
                     ${isSidebarCollapsed ? "md:ml-[80px]" : "md:ml-[260px]"}
                     ml-0
                 `}>

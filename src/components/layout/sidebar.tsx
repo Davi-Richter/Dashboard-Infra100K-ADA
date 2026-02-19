@@ -37,26 +37,14 @@ export function Sidebar({ connected, lastUpdated, onRefresh, loading, children, 
     const pathname = usePathname();
 
     return (
-        <aside className={`sidebar-glass h-screen flex flex-col overflow-y-auto transition-all duration-300 ${isCollapsed ? "w-[80px]" : "w-[260px]"}`}>
-            {/* Collapse Toggle */}
-            <div className="absolute right-[-12px] top-6 z-50 hidden md:block">
-                <button
-                    onClick={onToggle}
-                    className="bg-[#1e1e2d] border border-white/10 rounded-full p-1 hover:bg-[#2b2b3d] text-text-secondary transition-colors"
-                >
-                    {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-                </button>
-            </div>
-
+        <aside className={`sidebar-glass h-screen flex flex-col overflow-y-auto transition-all duration-300 w-[260px] ${isCollapsed ? "md:w-[80px]" : ""}`}>
             {/* Logo */}
-            <div className={`px-4 pt-6 pb-4 flex items-center ${isCollapsed ? "justify-center" : "gap-3"}`}>
+            <div className={`px-4 pt-6 pb-4 flex items-center gap-3 ${isCollapsed ? "md:justify-center" : ""}`}>
                 <LayoutDashboard size={28} className="text-accent shrink-0" />
-                {!isCollapsed && (
-                    <div className="overflow-hidden">
-                        <h1 className="text-[1.1rem] font-bold text-text-primary leading-tight truncate">Dashboard</h1>
-                        <p className="text-[0.7rem] text-text-tertiary truncate">Acadêmia da aprovação</p>
-                    </div>
-                )}
+                <div className={`overflow-hidden transition-all duration-300 ${isCollapsed ? "md:hidden" : ""}`}>
+                    <h1 className="text-[1.1rem] font-bold text-text-primary leading-tight truncate">Dashboard</h1>
+                    <p className="text-[0.7rem] text-text-tertiary truncate">Acadêmia da aprovação</p>
+                </div>
             </div>
 
             {/* Separator */}
@@ -64,18 +52,18 @@ export function Sidebar({ connected, lastUpdated, onRefresh, loading, children, 
 
             {/* Navigation */}
             <nav className="px-3 mt-4 space-y-1">
-                {!isCollapsed && <div className="sidebar-section-label truncate">Navegação</div>}
+                <div className={`sidebar-section-label truncate ${isCollapsed ? "md:hidden" : ""}`}>Navegação</div>
                 {NAV_ITEMS.map((item) => {
                     const isActive = pathname === item.href;
                     return (
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={`sidebar-item flex items-center ${isActive ? "sidebar-item-active" : ""} ${isCollapsed ? "justify-center px-0 py-3" : ""}`}
+                            className={`sidebar-item flex items-center ${isActive ? "sidebar-item-active" : ""} ${isCollapsed ? "md:justify-center md:px-0 md:py-3" : ""}`}
                             title={isCollapsed ? item.label : undefined}
                         >
                             <item.icon size={20} className="shrink-0" />
-                            {!isCollapsed && <span className="truncate">{item.label}</span>}
+                            <span className={`truncate ${isCollapsed ? "md:hidden" : ""}`}>{item.label}</span>
                         </Link>
                     );
                 })}
@@ -85,23 +73,25 @@ export function Sidebar({ connected, lastUpdated, onRefresh, loading, children, 
             <div className="mx-4 my-4 border-b border-white/[0.06]" />
 
             {/* Status */}
-            <div className={`px-4 space-y-3 ${isCollapsed ? "items-center flex flex-col" : ""}`}>
-                {!isCollapsed ? (
+            <div className={`px-4 space-y-3 ${isCollapsed ? "md:items-center md:flex md:flex-col" : ""}`}>
+                <div className={isCollapsed ? "md:hidden" : ""}>
                     <StatusBadge connected={connected} />
-                ) : (
-                    <div className={`w-3 h-3 rounded-full ${connected ? "bg-positive" : "bg-warning"}`} title={connected ? "Conectado" : "Desconectado"}></div>
+                </div>
+                {isCollapsed && (
+                    <div className={`hidden md:block w-3 h-3 rounded-full ${connected ? "bg-positive" : "bg-warning"}`} title={connected ? "Conectado" : "Desconectado"}></div>
                 )}
+
                 <button
                     onClick={onRefresh}
                     disabled={loading}
-                    className={`btn-glass flex items-center justify-center gap-2 ${isCollapsed ? "w-10 h-10 p-0 rounded-md" : "w-full"}`}
+                    className={`btn-glass flex items-center justify-center gap-2 ${isCollapsed ? "md:w-10 md:h-10 md:p-0 md:rounded-md" : "w-full"}`}
                     title="Atualizar Dados"
                 >
                     <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-                    {!isCollapsed && <span>Atualizar</span>}
+                    <span className={isCollapsed ? "md:hidden" : ""}>Atualizar</span>
                 </button>
-                {lastUpdated && !isCollapsed && (
-                    <p className="text-[0.65rem] text-text-muted text-center truncate">
+                {lastUpdated && (
+                    <p className={`text-[0.65rem] text-text-muted text-center truncate ${isCollapsed ? "md:hidden" : ""}`}>
                         Atualizado: {lastUpdated.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                     </p>
                 )}
@@ -112,7 +102,7 @@ export function Sidebar({ connected, lastUpdated, onRefresh, loading, children, 
 
             {/* Filters */}
             {children && (
-                <div className={`px-4 pb-6 flex-1 overflow-y-auto ${isCollapsed ? "hidden" : "block"}`}>
+                <div className={`px-4 pb-6 flex-1 overflow-y-auto ${isCollapsed ? "md:hidden" : ""}`}>
                     <div className="sidebar-section-label">Filtros</div>
                     {children}
                 </div>

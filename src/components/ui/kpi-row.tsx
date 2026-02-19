@@ -6,12 +6,16 @@ interface KpiRowProps {
 }
 
 export function KpiRow({ children, cols }: KpiRowProps) {
-    const gridClass = cols
-        ? `grid-cols-${cols}`
-        : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+    let colClass = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"; // default
+
+    if (cols === 1) colClass = "grid-cols-1";
+    else if (cols === 2) colClass = "grid-cols-1 sm:grid-cols-2";
+    else if (cols === 3) colClass = "grid-cols-1 sm:grid-cols-3";
+    else if (cols === 4) colClass = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
+    else if (cols === 5) colClass = "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
 
     return (
-        <div className={`grid ${gridClass} gap-4`} style={cols ? { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` } : undefined}>
+        <div className={`grid ${colClass} gap-4`}>
             {children}
         </div>
     );
