@@ -154,6 +154,7 @@ export default function CampanhasPage() {
                         color="#22c55e"
                         height={Math.max(roasData.length * 35, 200)}
                         yAxisWidth={150}
+                        tooltipFormatValue={(v) => `${v}x`}
                     />
                 </GlassCard>
 

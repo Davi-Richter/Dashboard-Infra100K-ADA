@@ -92,7 +92,7 @@ export default function CriativosPage() {
                 </div>
 
                 <GlassCard>
-                    <SectionHeader title="Curva de Retenção de Vídeo" />
+                    <SectionHeader title="Curva de Retenção de Vídeo (Geral)" />
                     <AreaChartGlass
                         data={videoRetention.data}
                         xKey="etapa"

@@ -16,6 +16,7 @@ export function DateRangePicker({ from, to, onChange }: DateRangePickerProps) {
                     value={from}
                     onChange={(e) => onChange(e.target.value, to)}
                     className="input-glass text-sm"
+                    style={{ colorScheme: "dark" }}
                 />
             </div>
             <div>
@@ -25,6 +26,7 @@ export function DateRangePicker({ from, to, onChange }: DateRangePickerProps) {
                     value={to}
                     onChange={(e) => onChange(from, e.target.value)}
                     className="input-glass text-sm"
+                    style={{ colorScheme: "dark" }}
                 />
             </div>
         </div>

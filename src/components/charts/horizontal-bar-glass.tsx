@@ -17,6 +17,7 @@ interface HorizontalBarGlassProps {
     height?: number;
     color?: string;
     formatValue?: (v: number) => string;
+    tooltipFormatValue?: (v: number) => string;
     yAxisWidth?: number;
 }
 
@@ -27,6 +28,7 @@ export function HorizontalBarGlass({
     height = 350,
     color = "#22c55e",
     formatValue,
+    tooltipFormatValue,
     yAxisWidth = 80,
 }: HorizontalBarGlassProps) {
     return (
@@ -63,7 +65,7 @@ export function HorizontalBarGlass({
                                         value: payload[0].value as number,
                                         color: payload[0].color
                                     }]}
-                                    formatValue={formatValue}
+                                    formatValue={tooltipFormatValue || formatValue}
                                 />
                             );
                         }

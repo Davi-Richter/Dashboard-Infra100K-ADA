@@ -19,6 +19,7 @@ interface BarChartGlassProps {
     height?: number;
     color?: string;
     formatValue?: (v: number) => string;
+    tooltipFormatValue?: (v: number) => string;
 }
 
 export function BarChartGlass({
@@ -28,6 +29,7 @@ export function BarChartGlass({
     height = 350,
     color = "rgba(255,255,255,0.6)",
     formatValue,
+    tooltipFormatValue,
 }: BarChartGlassProps) {
     return (
         <ResponsiveContainer width="100%" height={height}>
@@ -45,7 +47,10 @@ export function BarChartGlass({
                     tickLine={false}
                     tickFormatter={formatValue}
                 />
-                <Tooltip content={<GlassTooltip formatValue={formatValue} />} />
+                <Tooltip
+                    cursor={{ fill: "rgba(255,255,255,0.05)" }}
+                    content={<GlassTooltip formatValue={tooltipFormatValue || formatValue} />}
+                />
                 <Bar dataKey={yKey} radius={[4, 4, 0, 0]} fill={color} />
             </BarChart>
         </ResponsiveContainer>

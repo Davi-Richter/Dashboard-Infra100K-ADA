@@ -21,7 +21,7 @@ export default function ClientesPage() {
     const { vendas } = filtered;
 
     const kpis = useMemo(() => {
-        const uniqueClients = new Set(vendas.map((v) => v.nome)).size;
+        const uniqueClients = vendas.length;
         const totalFat = vendas.reduce((s, v) => s + v.valor, 0);
         const ticket = calc.ticketMedio(totalFat, vendas.length);
 
@@ -108,11 +108,11 @@ export default function ClientesPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <GlassCard>
                         <SectionHeader title="Vendas por UTM Source" />
-                        <HorizontalBarGlass data={utmSourceData} nameKey="source" valueKey="count" color="rgba(255,255,255,0.6)" />
+                        <HorizontalBarGlass data={utmSourceData} nameKey="source" valueKey="count" color="rgba(255,255,255,0.6)" tooltipFormatValue={(v) => String(v)} />
                     </GlassCard>
                     <GlassCard>
                         <SectionHeader title="Vendas por Estado" />
-                        <HorizontalBarGlass data={estadoData} nameKey="estado" valueKey="valor" color="#22c55e" formatValue={(v) => formatCurrency(v)} />
+                        <HorizontalBarGlass data={estadoData} nameKey="estado" valueKey="valor" color="#22c55e" formatValue={(v) => formatCurrency(v)} tooltipFormatValue={(v) => formatCurrency(v)} />
                     </GlassCard>
                 </div>
 

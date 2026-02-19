@@ -7,6 +7,7 @@ import { useFilters, filterVendas, filterFacebook, filterGeral } from "@/hooks/u
 import { usePathname } from "next/navigation";
 import { DateRangePicker } from "@/components/filters/date-range-picker";
 import { MultiSelectFilter } from "@/components/filters/multi-select-filter";
+import { Menu, X } from "lucide-react";
 import type { DashboardData } from "@/types/dashboard";
 
 interface DashboardContextValue {
@@ -16,7 +17,7 @@ interface DashboardContextValue {
     error: string | null;
 }
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 
 const DashboardContext = createContext<DashboardContextValue>({
     data: { vendas: [], facebook: [], geral: [] },
@@ -33,6 +34,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     const { data, loading, error, lastUpdated, refresh } = useDashboardData();
     const { filters, setDateRange, setProdutos, setCampanhas, setObjetivos } = useFilters();
     const pathname = usePathname();
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const filtered = useMemo(
         () => ({
@@ -63,47 +66,78 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
     return (
         <DashboardContext.Provider value={{ data, filtered, loading, error }}>
-            <div className="flex min-h-screen">
-                <Sidebar
-                    connected={!error && !loading}
-                    lastUpdated={lastUpdated}
-                    onRefresh={refresh}
-                    loading={loading}
-                >
-                    <div className="space-y-4">
-                        <DateRangePicker
-                            from={filters.dateRange.from}
-                            to={filters.dateRange.to}
-                            onChange={setDateRange}
-                        />
-                        {showProduto && (
-                            <MultiSelectFilter
-                                label="Produto"
-                                options={produtoOptions}
-                                selected={filters.produtos}
-                                onChange={setProdutos}
-                            />
-                        )}
-                        {showCampanha && (
-                            <MultiSelectFilter
-                                label="Campanha"
-                                options={campanhaOptions}
-                                selected={filters.campanhas}
-                                onChange={setCampanhas}
-                            />
-                        )}
-                        {showObjetivo && (
-                            <MultiSelectFilter
-                                label="Objetivo"
-                                options={objetivoOptions}
-                                selected={filters.objetivos}
-                                onChange={setObjetivos}
-                            />
-                        )}
-                    </div>
-                </Sidebar>
+            <div className="flex min-h-screen relative">
+                {/* Mobile Header */}
+                <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#09091b]/95 border-b border-white/5 backdrop-blur-md z-50 flex items-center px-4">
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="p-2 -ml-2 text-white/70 hover:text-white"
+                    >
+                        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                    <span className="ml-2 font-semibold text-text-primary">Acadêmia da aprovação</span>
+                </div>
 
-                <main className="ml-[260px] flex-1 p-8 min-h-screen">
+                {/* Sidebar Overlay for Mobile */}
+                {isMobileMenuOpen && (
+                    <div
+                        className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                )}
+
+                <div className={`
+                    fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out
+                    ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+                    md:translate-x-0
+                `}>
+                    <Sidebar
+                        connected={!error && !loading}
+                        lastUpdated={lastUpdated}
+                        onRefresh={refresh}
+                        loading={loading}
+                        isCollapsed={isSidebarCollapsed}
+                        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                    >
+                        <div className="space-y-4">
+                            <DateRangePicker
+                                from={filters.dateRange.from}
+                                to={filters.dateRange.to}
+                                onChange={setDateRange}
+                            />
+                            {showProduto && (
+                                <MultiSelectFilter
+                                    label="Produto"
+                                    options={produtoOptions}
+                                    selected={filters.produtos}
+                                    onChange={setProdutos}
+                                />
+                            )}
+                            {showCampanha && (
+                                <MultiSelectFilter
+                                    label="Campanha"
+                                    options={campanhaOptions}
+                                    selected={filters.campanhas}
+                                    onChange={setCampanhas}
+                                />
+                            )}
+                            {showObjetivo && (
+                                <MultiSelectFilter
+                                    label="Objetivo"
+                                    options={objetivoOptions}
+                                    selected={filters.objetivos}
+                                    onChange={setObjetivos}
+                                />
+                            )}
+                        </div>
+                    </Sidebar>
+                </div>
+
+                <main className={`
+                    flex-1 p-4 md:p-8 min-h-screen pt-20 md:pt-8 transition-all duration-300
+                    ${isSidebarCollapsed ? "md:ml-[80px]" : "md:ml-[260px]"}
+                    ml-0
+                `}>
                     {loading ? (
                         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
                             <div className="w-12 h-12 border-2 border-accent border-t-transparent rounded-full animate-spin" />
