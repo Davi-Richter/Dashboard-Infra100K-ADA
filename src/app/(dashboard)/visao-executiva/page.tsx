@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { formatCurrency, formatNumber, formatPercent } from "@/lib/formatters";
 import * as calc from "@/lib/calculations";
+import { ORGANIC_PRODUCTS } from "@/lib/constants";
 import { format } from "date-fns";
 
 export default function VisaoExecutivaPage() {
@@ -34,9 +35,15 @@ export default function VisaoExecutivaPage() {
         const totalVendas = vendas.length;
         const investimento = facebook.reduce((s, r) => s + r.amountSpent, 0);
         const lucroVal = calc.lucro(faturamento, investimento);
-        const roasVal = calc.roas(faturamento, investimento);
         const ticket = calc.ticketMedio(faturamento, totalVendas);
-        const cpaVal = calc.cpa(investimento, totalVendas);
+
+        // Separa métricas Orgânicas para CPA/ROAS mais precisos
+        const vendasAds = vendas.filter(v => !ORGANIC_PRODUCTS.includes(v.produto));
+        const totalVendasAds = vendasAds.length;
+        const receitaAds = vendasAds.reduce((s, v) => s + v.valor, 0);
+
+        const roasVal = calc.roas(receitaAds, investimento);
+        const cpaVal = calc.cpa(investimento, totalVendasAds);
 
         return { faturamento, totalVendas, investimento, lucro: lucroVal, roas: roasVal, ticket, cpa: cpaVal };
     }, [vendas, facebook, geral]);

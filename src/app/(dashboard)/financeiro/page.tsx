@@ -13,13 +13,13 @@ import { AreaChartGlass } from "@/components/charts/area-chart-glass";
 import { BarChartGlass } from "@/components/charts/bar-chart-glass";
 import { DollarSign, CreditCard, Wallet, TrendingUp, Percent } from "lucide-react";
 import { formatCurrency, formatPercent } from "@/lib/formatters";
-import { PLATFORM_FEE_RATE } from "@/lib/constants";
+import { PLATFORM_FEE_RATE, ORGANIC_PRODUCTS } from "@/lib/constants";
 import * as calc from "@/lib/calculations";
 import { format } from "date-fns";
 
 export default function FinanceiroPage() {
     const { filtered } = useDashboard();
-    const { geral, facebook } = filtered;
+    const { geral, facebook, vendas } = filtered;
 
     const kpis = useMemo(() => {
         const receita = geral.reduce((s, r) => s + r.faturamentoTotal, 0);
@@ -27,10 +27,16 @@ export default function FinanceiroPage() {
         const custoAds = facebook.reduce((s, r) => s + r.amountSpent, 0);
         const lucroVal = receita - taxa - custoAds;
         const margemVal = calc.margem(lucroVal, receita);
-        const roasVal = calc.roas(receita, custoAds);
+
+        // Isolar receita orgânica para não distorcer o ponteiro do ROAS (ADS)
+        const receitaAds = vendas
+            .filter(v => !ORGANIC_PRODUCTS.includes(v.produto))
+            .reduce((s, v) => s + v.valor, 0);
+
+        const roasVal = calc.roas(receitaAds, custoAds);
 
         return { receita, taxa, custoAds, lucro: lucroVal, margem: margemVal, roas: roasVal };
-    }, [geral, facebook]);
+    }, [geral, facebook, vendas]);
 
     // Waterfall
     const waterfallItems = useMemo(() => [
@@ -90,7 +96,7 @@ export default function FinanceiroPage() {
             <div className="space-y-6">
                 <KpiRow cols={3}>
                     <KpiCard icon={DollarSign} label="Receita Bruta" value={formatCurrency(kpis.receita)} />
-                    <KpiCard icon={CreditCard} label="Taxa Plataforma 7,07%" value={formatCurrency(kpis.taxa)} />
+                    <KpiCard icon={CreditCard} label="Taxa Plataforma 4,5%" value={formatCurrency(kpis.taxa)} />
                     <KpiCard icon={Wallet} label="Custo Ads" value={formatCurrency(kpis.custoAds)} />
                 </KpiRow>
                 <KpiRow cols={2}>
