@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import type { RawVendaRow, RawFacebookRow } from "@/types/dashboard";
+import type { RawVendaRow, RawFacebookRow, RawAnalyticsRow } from "@/types/dashboard";
 import { SPREADSHEET_ID, SHEETS } from "./constants";
 
 // ─── Build CSV export URL ────────────────────────────────────────
@@ -51,6 +51,10 @@ export async function fetchFacebook(): Promise<RawFacebookRow[]> {
 
 export async function fetchGeral(): Promise<string[][]> {
     return fetchCsv<string[]>(SHEETS.geral, false) as Promise<string[][]>;
+}
+
+export async function fetchAnalytics(): Promise<string[][]> {
+    return fetchCsv<string[]>(SHEETS.analytics, false) as Promise<string[][]>;
 }
 
 // ─── Check connection ────────────────────────────────────────────

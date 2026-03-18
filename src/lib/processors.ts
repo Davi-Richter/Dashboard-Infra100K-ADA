@@ -3,9 +3,11 @@ import { ptBR } from "date-fns/locale";
 import type {
     RawVendaRow,
     RawFacebookRow,
+    RawAnalyticsRow,
     Venda,
     FacebookRow,
     GeralRow,
+    AnalyticsRow,
 } from "@/types/dashboard";
 import { parseCurrency } from "./formatters";
 import {
@@ -15,6 +17,7 @@ import {
     GERAL_CURRENCY_COLS,
     GERAL_NUMERIC_COLS,
     DIAS_SEMANA,
+    ORGANIC_PRODUCTS,
 } from "./constants";
 
 // ─── Vendas ──────────────────────────────────────────────────────
@@ -39,6 +42,38 @@ export function processVendas(rows: RawVendaRow[]): Venda[] {
                 return trimmed === "" ? "Direto / Orgânico" : trimmed;
             };
 
+            const produto = (row["Produto comprado"] || "").trim();
+            const utmCampaign = fillUtm(row["UTM Campaign"]);
+            const utmMedium = fillUtm(row["UTM Medium"]);
+            const utmSource = fillUtm(row["UTM Source"]);
+            const utmContent = fillUtm(row["UTM Content"]);
+            const utmTerm = fillUtm(row["UTM Term"]);
+
+            const isOrganicProduct = ORGANIC_PRODUCTS.includes(produto);
+
+            let isDiscursivasOrganic = false;
+            if (produto === "Curso de Discursivas + Temas Inéditos") {
+                const startAdsDate = new Date("2026-02-24T00:00:00");
+                if (isValidDate && dateObj < startAdsDate) {
+                    isDiscursivasOrganic = true;
+                }
+            }
+
+            const isOrganicUtms =
+                utmCampaign === "Direto / Orgânico" &&
+                utmMedium === "Direto / Orgânico" &&
+                utmSource === "Direto / Orgânico" &&
+                utmContent === "Direto / Orgânico" &&
+                utmTerm === "Direto / Orgânico";
+
+            const sourceLower = utmSource.toLowerCase();
+            const mediumLower = utmMedium.toLowerCase();
+            const isWhitelistedSource =
+                sourceLower.includes("youtube") ||
+                sourceLower.includes("academiadaaprovacao") ||
+                sourceLower.includes("google.com") ||
+                (sourceLower.includes("instagram") && mediumLower.includes("org"));
+
             return {
                 dataCompra: isValidDate ? dateObj : new Date(0),
                 data: isValidDate ? format(dateObj, "yyyy-MM-dd") : "",
@@ -47,16 +82,17 @@ export function processVendas(rows: RawVendaRow[]): Venda[] {
                     ? DIAS_SEMANA[dateObj.getDay()] || "Outro"
                     : "Outro",
                 nome: (row["Nome do comprador"] || "").trim(),
-                produto: (row["Produto comprado"] || "").trim(),
+                produto,
                 valor: parseCurrency(row["Valor Venda"]),
                 celular,
                 ddd,
                 estado,
-                utmCampaign: fillUtm(row["UTM Campaign"]),
-                utmMedium: fillUtm(row["UTM Medium"]),
-                utmSource: fillUtm(row["UTM Source"]),
-                utmContent: fillUtm(row["UTM Content"]),
-                utmTerm: fillUtm(row["UTM Term"]),
+                utmCampaign,
+                utmMedium,
+                utmSource,
+                utmContent,
+                utmTerm,
+                isOrganic: isOrganicProduct || isDiscursivasOrganic || isOrganicUtms || isWhitelistedSource,
             };
         })
         .filter((v) => v.data !== "");
@@ -168,4 +204,54 @@ export function processGeral(rawRows: string[][]): GeralRow[] {
             };
         })
         .filter((r): r is GeralRow => r !== null);
+}
+
+// ─── Analytics ───────────────────────────────────────────────────
+
+export function processAnalytics(rows: string[][]): AnalyticsRow[] {
+    const cutoff = new Date(DATA_START_DATE);
+
+    // GA4 Magic Reports outputs ~8 metadata header rows before the actual data.
+    // We find the first row that looks like a real data row (has a date in col[1]).
+    const dataRows = rows.filter((row) => {
+        const dateCandidate = (row[1] || "").trim();
+        // Match "2026-03-18" or "20260318" patterns
+        return /^\d{4}-\d{2}-\d{2}$/.test(dateCandidate) || (/^\d{8}$/.test(dateCandidate) && dateCandidate.length === 8);
+    });
+
+    return dataRows
+        .map((row) => {
+            // Positional columns from GA4 Magic Reports:
+            // [0] = sessionSourceMedium  (e.g. "meta-ads / an")
+            // [1] = Date                 (e.g. "2026-02-18")
+            // [2] = pagePath             (e.g. "/curso-plfcd/")
+            // [3] = Total users          (e.g. "2009")
+            // [4] = Engagement rate      (e.g. "0,2533269962" — Brazilian comma decimal)
+            // [5] = Sessions             (e.g. "2104")
+
+            const dateStr = (row[1] || "").trim();
+            let dateObj: Date;
+
+            if (/^\d{8}$/.test(dateStr)) {
+                const yyyy = dateStr.substring(0, 4);
+                const mm = dateStr.substring(4, 6);
+                const dd = dateStr.substring(6, 8);
+                dateObj = new Date(`${yyyy}-${mm}-${dd}T12:00:00Z`);
+            } else {
+                dateObj = new Date(dateStr + "T12:00:00Z");
+            }
+
+            if (!isValid(dateObj)) return null;
+
+            return {
+                sourceMedium: (row[0] || "").trim(),
+                date: dateObj,
+                dateString: format(dateObj, "yyyy-MM-dd"),
+                pagePath: (row[2] || "").trim(),
+                users: toInt(row[3]),
+                engagementRate: parseFloat((row[4] || "0").replace(",", ".")) || 0,
+                sessions: toInt(row[5]),
+            };
+        })
+        .filter((r): r is AnalyticsRow => r !== null && r.date >= cutoff);
 }

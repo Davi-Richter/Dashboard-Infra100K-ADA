@@ -47,6 +47,18 @@ export interface RawFacebookRow {
   [key: string]: string;
 }
 
+// ─── Analytics ───────────────────────────────────────────────────
+
+export interface RawAnalyticsRow {
+  "Session source / medium"?: string;
+  Date?: string;
+  "Page path"?: string;
+  "Total users"?: string;
+  "Engagement rate"?: string;
+  Sessions?: string;
+  [key: string]: string | undefined;
+}
+
 // ─── Processed types ─────────────────────────────────────────────
 
 export interface Venda {
@@ -65,6 +77,7 @@ export interface Venda {
   utmSource: string;
   utmContent: string;
   utmTerm: string;
+  isOrganic: boolean;
 }
 
 export interface FacebookRow {
@@ -133,6 +146,16 @@ export interface GeralRow {
   ticketMedio: number;
 }
 
+export interface AnalyticsRow {
+  sourceMedium: string;
+  date: Date;
+  dateString: string;
+  pagePath: string;
+  users: number;
+  engagementRate: number;
+  sessions: number;
+}
+
 // ─── Aggregated metrics ──────────────────────────────────────────
 
 export interface CampaignMetrics {
@@ -175,6 +198,7 @@ export interface DashboardData {
   vendas: Venda[];
   facebook: FacebookRow[];
   geral: GeralRow[];
+  analytics: AnalyticsRow[];
 }
 
 // ─── Filter state ────────────────────────────────────────────────

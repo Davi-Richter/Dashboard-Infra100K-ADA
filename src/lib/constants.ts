@@ -9,12 +9,13 @@ export const SHEETS = {
     geral: "Geral",
     vendas: "Vendas",
     facebook: "Facebook",
+    analytics: "Analytics",
 } as const;
 
 export const PLATFORM_FEE_RATE = 0.045; // 4.5%
 export const ORGANIC_PRODUCTS = [
-    "Mentoria + Curso Policia Legislativa de Mato Grosso do Sul",
-    "Policial Rodoviário Federal",
+    "Polícia Rodoviária Federal",
+    "Mentoria + Curso Polícia Legislativa de Mato Grosso do Sul",
 ];
 export const DATA_START_DATE = "2026-01-27";
 export const CACHE_TTL = 300; // 5 min

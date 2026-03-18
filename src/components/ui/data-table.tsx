@@ -1,9 +1,10 @@
+import { ReactNode } from "react";
 import { GlassCard } from "./glass-card";
 
 interface Column<T> {
     key: string;
     label: string;
-    format?: (value: unknown, row: T) => string;
+    format?: (value: unknown, row: T) => ReactNode;
     align?: "left" | "right" | "center";
 }
 

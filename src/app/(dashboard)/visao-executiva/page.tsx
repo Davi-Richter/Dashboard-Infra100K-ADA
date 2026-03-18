@@ -31,33 +31,46 @@ export default function VisaoExecutivaPage() {
 
     // ─── KPIs ────────────────────────────────────────────────────
     const kpis = useMemo(() => {
-        const faturamento = geral.reduce((s, r) => s + r.faturamentoTotal, 0);
+        const faturamento = vendas.reduce((s, v) => s + v.valor, 0);
         const totalVendas = vendas.length;
         const investimento = facebook.reduce((s, r) => s + r.amountSpent, 0);
         const lucroVal = calc.lucro(faturamento, investimento);
         const ticket = calc.ticketMedio(faturamento, totalVendas);
 
         // Separa métricas Orgânicas para CPA/ROAS mais precisos
-        const vendasAds = vendas.filter(v => !ORGANIC_PRODUCTS.includes(v.produto));
+        const vendasAds = vendas.filter(v => !v.isOrganic);
         const totalVendasAds = vendasAds.length;
         const receitaAds = vendasAds.reduce((s, v) => s + v.valor, 0);
+
+        const vendasOrg = vendas.filter(v => v.isOrganic);
+        const totalVendasOrg = vendasOrg.length;
 
         const roasVal = calc.roas(receitaAds, investimento);
         const cpaVal = calc.cpa(investimento, totalVendasAds);
 
-        return { faturamento, totalVendas, investimento, lucro: lucroVal, roas: roasVal, ticket, cpa: cpaVal };
+        return { faturamento, totalVendas, totalVendasOrg, investimento, lucro: lucroVal, roas: roasVal, ticket, cpa: cpaVal };
     }, [vendas, facebook, geral]);
 
     // ─── Chart data ──────────────────────────────────────────────
     const dailyData = useMemo(() => {
-        return geral
-            .sort((a, b) => a.data.localeCompare(b.data))
-            .map((r) => ({
-                data: format(new Date(r.data), "dd/MM"),
-                Faturamento: r.faturamentoTotal,
-                Investimento: r.investimento,
-            }));
-    }, [geral]);
+        const revByDate = new Map<string, number>();
+        vendas.forEach((v) => {
+            revByDate.set(v.data, (revByDate.get(v.data) || 0) + v.valor);
+        });
+
+        const invByDate = new Map<string, number>();
+        facebook.forEach((f) => {
+            invByDate.set(f.data, (invByDate.get(f.data) || 0) + f.amountSpent);
+        });
+
+        const allDates = Array.from(new Set([...revByDate.keys(), ...invByDate.keys()])).sort();
+
+        return allDates.map((date) => ({
+            data: format(new Date(date), "dd/MM"),
+            Faturamento: revByDate.get(date) || 0,
+            Investimento: invByDate.get(date) || 0,
+        }));
+    }, [vendas, facebook]);
 
     const produtoData = useMemo(() => {
         const map = new Map<string, number>();
@@ -106,14 +119,15 @@ export default function VisaoExecutivaPage() {
                     <KpiCard icon={TrendingUp} label="Lucro Líquido" value={formatCurrency(kpis.lucro)}
                         deltaType={kpis.lucro >= 0 ? "positive" : "negative"} />
                     <KpiCard icon={BarChart3} label="ROAS" value={`${kpis.roas.toFixed(2)}x`} />
-                    <KpiCard icon={ShoppingCart} label="Vendas" value={formatNumber(kpis.totalVendas)} />
+                    <KpiCard icon={ShoppingCart} label="Vendas Totais" value={formatNumber(kpis.totalVendas)} />
                 </KpiRow>
 
                 {/* KPIs Row 2 */}
-                <KpiRow cols={3}>
+                <KpiRow cols={4}>
                     <KpiCard icon={Target} label="Investimento Ads" value={formatCurrency(kpis.investimento)} />
                     <KpiCard icon={Receipt} label="Ticket Médio" value={formatCurrency(kpis.ticket)} />
                     <KpiCard icon={Wallet} label="CPA" value={formatCurrency(kpis.cpa)} />
+                    <KpiCard icon={ShoppingCart} label="Vendas Orgânicas" value={formatNumber(kpis.totalVendasOrg)} />
                 </KpiRow>
 
                 {/* Charts Row 1 */}

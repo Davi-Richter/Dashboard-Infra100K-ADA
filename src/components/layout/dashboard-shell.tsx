@@ -3,7 +3,7 @@
 import { ReactNode, useMemo } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
-import { useFilters, filterVendas, filterFacebook, filterGeral } from "@/hooks/use-filters";
+import { useFilters, filterVendas, filterFacebook, filterGeral, filterAnalytics } from "@/hooks/use-filters";
 import { usePathname } from "next/navigation";
 import { DateRangePicker } from "@/components/filters/date-range-picker";
 import { MultiSelectFilter } from "@/components/filters/multi-select-filter";
@@ -20,8 +20,8 @@ interface DashboardContextValue {
 import { createContext, useContext, useState } from "react";
 
 const DashboardContext = createContext<DashboardContextValue>({
-    data: { vendas: [], facebook: [], geral: [] },
-    filtered: { vendas: [], facebook: [], geral: [] },
+    data: { vendas: [], facebook: [], geral: [], analytics: [] },
+    filtered: { vendas: [], facebook: [], geral: [], analytics: [] },
     loading: true,
     error: null,
 });
@@ -42,6 +42,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             vendas: filterVendas(data.vendas, filters),
             facebook: filterFacebook(data.facebook, filters),
             geral: filterGeral(data.geral, filters),
+            analytics: filterAnalytics(data.analytics || [], filters),
         }),
         [data, filters]
     );

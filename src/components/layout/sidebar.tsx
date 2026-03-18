@@ -12,11 +12,13 @@ import {
     RefreshCw,
     ChevronLeft,
     ChevronRight,
+    Activity,
 } from "lucide-react";
 import { StatusBadge } from "@/components/ui/status-badge";
 
 const NAV_ITEMS = [
     { label: "Visão Executiva", href: "/visao-executiva", icon: LayoutGrid },
+    { label: "Tráfego & UX", href: "/analytics", icon: Activity },
     { label: "Campanhas", href: "/campanhas", icon: Target },
     { label: "Criativos", href: "/criativos", icon: Palette },
     { label: "Clientes", href: "/clientes", icon: Users },

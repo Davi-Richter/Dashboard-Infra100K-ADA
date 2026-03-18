@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { DashboardData } from "@/types/dashboard";
 
-const EMPTY_DATA: DashboardData = { vendas: [], facebook: [], geral: [] };
+const EMPTY_DATA: DashboardData = { vendas: [], facebook: [], geral: [], analytics: [] };
 
 export function useDashboardData() {
     const [data, setData] = useState<DashboardData>(EMPTY_DATA);
@@ -22,6 +22,7 @@ export function useDashboardData() {
                 vendas: json.vendas || [],
                 facebook: json.facebook || [],
                 geral: json.geral || [],
+                analytics: json.analytics || [],
             });
             setLastUpdated(new Date());
         } catch (err) {

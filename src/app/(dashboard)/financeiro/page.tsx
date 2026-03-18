@@ -22,20 +22,24 @@ export default function FinanceiroPage() {
     const { geral, facebook, vendas } = filtered;
 
     const kpis = useMemo(() => {
-        const receita = geral.reduce((s, r) => s + r.faturamentoTotal, 0);
+        const receita = vendas.reduce((s, v) => s + v.valor, 0);
         const taxa = receita * PLATFORM_FEE_RATE;
         const custoAds = facebook.reduce((s, r) => s + r.amountSpent, 0);
         const lucroVal = receita - taxa - custoAds;
         const margemVal = calc.margem(lucroVal, receita);
 
-        // Isolar receita orgânica para não distorcer o ponteiro do ROAS (ADS)
+        // Isolar receita orgânica e tráfego
         const receitaAds = vendas
-            .filter(v => !ORGANIC_PRODUCTS.includes(v.produto))
+            .filter(v => !v.isOrganic)
+            .reduce((s, v) => s + v.valor, 0);
+
+        const receitaOrg = vendas
+            .filter(v => v.isOrganic)
             .reduce((s, v) => s + v.valor, 0);
 
         const roasVal = calc.roas(receitaAds, custoAds);
 
-        return { receita, taxa, custoAds, lucro: lucroVal, margem: margemVal, roas: roasVal };
+        return { receita, receitaAds, receitaOrg, taxa, custoAds, lucro: lucroVal, margem: margemVal, roas: roasVal };
     }, [geral, facebook, vendas]);
 
     // Waterfall
@@ -48,26 +52,32 @@ export default function FinanceiroPage() {
 
     // Daily lucro
     const dailyLucro = useMemo(() => {
-        const sorted = [...geral].sort((a, b) => a.data.localeCompare(b.data));
-
-        // Group Facebook by date for daily investment
-        const fbByDate = new Map<string, number>();
-        facebook.forEach((r) => {
-            fbByDate.set(r.data, (fbByDate.get(r.data) || 0) + r.amountSpent);
+        const revByDate = new Map<string, number>();
+        vendas.forEach((v) => {
+            revByDate.set(v.data, (revByDate.get(v.data) || 0) + v.valor);
         });
 
+        const invByDate = new Map<string, number>();
+        facebook.forEach((f) => {
+            invByDate.set(f.data, (invByDate.get(f.data) || 0) + f.amountSpent);
+        });
+
+        const allDates = Array.from(new Set([...revByDate.keys(), ...invByDate.keys()])).sort();
+
         let cumsum = 0;
-        return sorted.map((r) => {
-            const invest = fbByDate.get(r.data) || r.investimento;
-            const lucro = r.lucro || (r.faturamentoTotal - r.faturamentoTotal * PLATFORM_FEE_RATE - invest);
+        return allDates.map((date) => {
+            const fat = revByDate.get(date) || 0;
+            const invest = invByDate.get(date) || 0;
+            const lucro = fat - (fat * PLATFORM_FEE_RATE) - invest;
             cumsum += lucro;
+
             return {
-                data: format(new Date(r.data), "dd/MM"),
+                data: format(new Date(date), "dd/MM"),
                 "Lucro Diário": parseFloat(lucro.toFixed(2)),
                 "Acumulado": parseFloat(cumsum.toFixed(2)),
             };
         });
-    }, [geral, facebook]);
+    }, [vendas, facebook]);
 
     // Projection
     const projection = useMemo(() => {
@@ -94,8 +104,9 @@ export default function FinanceiroPage() {
             />
 
             <div className="space-y-6">
-                <KpiRow cols={3}>
-                    <KpiCard icon={DollarSign} label="Receita Bruta" value={formatCurrency(kpis.receita)} />
+                <KpiRow cols={4}>
+                    <KpiCard icon={DollarSign} label="Receita Tráfego" value={formatCurrency(kpis.receitaAds)} />
+                    <KpiCard icon={DollarSign} label="Receita Orgânica" value={formatCurrency(kpis.receitaOrg)} />
                     <KpiCard icon={CreditCard} label="Taxa Plataforma 4,5%" value={formatCurrency(kpis.taxa)} />
                     <KpiCard icon={Wallet} label="Custo Ads" value={formatCurrency(kpis.custoAds)} />
                 </KpiRow>

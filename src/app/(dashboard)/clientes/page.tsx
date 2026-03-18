@@ -43,6 +43,17 @@ export default function ClientesPage() {
             .slice(0, 10);
     }, [vendas]);
 
+    const organicSourceData = useMemo(() => {
+        const map = new Map<string, number>();
+        vendas
+            .filter((v) => v.isOrganic)
+            .forEach((v) => map.set(v.utmSource, (map.get(v.utmSource) || 0) + 1));
+        return Array.from(map.entries())
+            .map(([source, count]) => ({ source, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10);
+    }, [vendas]);
+
     const estadoData = useMemo(() => {
         const map = new Map<string, number>();
         vendas.forEach((v) => {
@@ -71,7 +82,6 @@ export default function ClientesPage() {
     const recentClients = useMemo(() => {
         return [...vendas]
             .sort((a, b) => new Date(b.dataCompra).getTime() - new Date(a.dataCompra).getTime())
-            .slice(0, 20)
             .map((v) => ({
                 data: format(new Date(v.dataCompra), "dd/MM/yyyy HH:mm"),
                 nome: v.nome,
@@ -79,16 +89,23 @@ export default function ClientesPage() {
                 valor: v.valor,
                 estado: v.estado,
                 utmSource: v.utmSource,
+                isOrganic: v.isOrganic,
             }));
     }, [vendas]);
 
     const tableColumns = [
         { key: "data", label: "Data" },
         { key: "nome", label: "Nome" },
+        {
+            key: "isOrganic",
+            label: "Origem",
+            format: (v: unknown) => v
+                ? <span className="px-2 py-1 text-xs rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Orgânico</span>
+                : <span className="px-2 py-1 text-xs rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">Tráfego</span>
+        },
         { key: "produto", label: "Produto" },
         { key: "valor", label: "Valor", align: "right" as const, format: (v: unknown) => formatCurrency(v as number) },
         { key: "estado", label: "Estado" },
-        { key: "utmSource", label: "UTM Source" },
     ];
 
     return (
@@ -107,23 +124,30 @@ export default function ClientesPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <GlassCard>
-                        <SectionHeader title="Vendas por UTM Source" />
+                        <SectionHeader title="Vendas por Fonte da Compra (Geral)" />
                         <HorizontalBarGlass data={utmSourceData} nameKey="source" valueKey="count" color="rgba(255,255,255,0.6)" tooltipFormatValue={(v) => String(v)} />
                     </GlassCard>
                     <GlassCard>
-                        <SectionHeader title="Vendas por Estado" />
-                        <HorizontalBarGlass data={estadoData} nameKey="estado" valueKey="valor" color="#22c55e" formatValue={(v) => formatCurrency(v)} tooltipFormatValue={(v) => formatCurrency(v)} />
+                        <SectionHeader title="Vendas Orgânicas por Origem" />
+                        <HorizontalBarGlass data={organicSourceData} nameKey="source" valueKey="count" color="#22c55e" tooltipFormatValue={(v) => String(v)} />
                     </GlassCard>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <GlassCard>
-                        <SectionHeader title="Compras por Hora do Dia" />
-                        <BarChartGlass data={horaData} xKey="hora" yKey="vendas" color="rgba(255,255,255,0.5)" />
+                        <SectionHeader title="Vendas por Estado" />
+                        <HorizontalBarGlass data={estadoData} nameKey="estado" valueKey="valor" color="rgba(255,255,255,0.7)" formatValue={(v) => formatCurrency(v)} tooltipFormatValue={(v) => formatCurrency(v)} />
                     </GlassCard>
                     <GlassCard>
                         <SectionHeader title="Vendas por Produto" />
                         <DonutChartGlass data={produtoData} />
+                    </GlassCard>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6">
+                    <GlassCard>
+                        <SectionHeader title="Compras por Hora do Dia" />
+                        <BarChartGlass data={horaData} xKey="hora" yKey="vendas" color="rgba(255,255,255,0.5)" />
                     </GlassCard>
                 </div>
 

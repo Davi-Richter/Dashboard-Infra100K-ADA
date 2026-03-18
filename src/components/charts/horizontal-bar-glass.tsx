@@ -59,6 +59,7 @@ export function HorizontalBarGlass({
                         if (active && payload && payload.length) {
                             return (
                                 <GlassTooltip
+                                    active={active}
                                     label={String(label)}
                                     payload={[{
                                         name: "Valor",

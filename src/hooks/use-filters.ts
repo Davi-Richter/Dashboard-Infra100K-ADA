@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import type { FilterState, Venda, FacebookRow, GeralRow } from "@/types/dashboard";
+import type { FilterState, Venda, FacebookRow, GeralRow, AnalyticsRow } from "@/types/dashboard";
 import { format } from "date-fns";
 import { DATA_START_DATE } from "@/lib/constants";
 
@@ -89,6 +89,19 @@ export function filterGeral(geral: GeralRow[], filters: FilterState): GeralRow[]
     }
     if (filters.dateRange.to) {
         result = result.filter((r) => r.data <= filters.dateRange.to);
+    }
+
+    return result;
+}
+
+export function filterAnalytics(analytics: AnalyticsRow[], filters: FilterState): AnalyticsRow[] {
+    let result = analytics;
+
+    if (filters.dateRange.from) {
+        result = result.filter((r) => r.dateString >= filters.dateRange.from);
+    }
+    if (filters.dateRange.to) {
+        result = result.filter((r) => r.dateString <= filters.dateRange.to);
     }
 
     return result;
